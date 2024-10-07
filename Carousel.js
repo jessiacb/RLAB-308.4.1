@@ -74,3 +74,13 @@ export function start() {
     $(multipleCardCarousel).addClass("slide");
   }
 }
+export function favourite(imageId) {
+  // toggle for favoriting image
+  axios.post('/favourites', { image_id: imageId })
+    .then(response => {
+      console.log('Image favorited:', response);
+    })
+    .catch(error => {
+      console.error('Error favoriting image:', error);
+    });
+}
