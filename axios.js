@@ -34,3 +34,13 @@ export async function fetchImagesByBreed(breedId) {
     console.error('Error fetching images:', error);
   }
 }
+function updateProgress(event) {
+    const progressBar = document.getElementById('progressBar');
+    if (event.lengthComputable) {
+      const percentComplete = (event.loaded / event.total) * 100;
+      progressBar.style.width = percentComplete + '%';
+    }
+  }
+  
+  axios.defaults.onDownloadProgress = updateProgress;
+  
