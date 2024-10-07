@@ -109,3 +109,76 @@ export async function favourite(imgId) {
  * - Test other breeds as well. Not every breed has the same data available, so
  *   your code should account for this.
  */
+document.addEventListener('DOMContentLoaded', async function () {
+  await initialLoad();
+});
+
+async function initialLoad() {
+  try {
+    const breedSelect = document.getElementById('breedSelect');
+    const response = await fetch('https://api.thecatapi.com/v1/breeds');
+    const breeds = await response.json();
+
+    breeds.forEach(breed => {
+      const option = document.createElement('option');
+      option.value = breed.id;
+      option.textContent = breed.name;
+      breedSelect.appendChild(option);
+    });
+
+    breedSelect.addEventListener('change', handleBreedSelect);
+
+    // load first breed in dropdown
+    if (breeds.length) {
+      handleBreedSelect({ target: { value: breeds[0].id } });
+    }
+  } catch (error) {
+    console.error('Error fetching breeds:', error);
+  }
+}
+
+async function handleBreedSelect(event) {
+  const breedId = event.target.value;
+  const carouselInner = document.getElementById('carouselInner');
+  const infoDump = document.getElementById('infoDump');
+
+  // clear existing content
+  carouselInner.innerHTML = '';
+  infoDump.innerHTML = '';
+
+  try {
+    const response = await fetch(`https://api.thecatapi.com/v1/images/search?breed_id=${breedId}&limit=5`);
+    const images = await response.json();
+
+    images.forEach(image => {
+      const carouselItem = document.createElement('div');
+      carouselItem.classList.add('carousel-item');
+      
+      const imgWrapper = document.createElement('div');
+      imgWrapper.classList.add('img-wrapper');
+
+      const img = document.createElement('img');
+      img.src = image.url;
+      img.classList.add('d-block', 'w-100');
+
+      imgWrapper.appendChild(img);
+      carouselItem.appendChild(imgWrapper);
+
+      carouselInner.appendChild(carouselItem);
+    });
+
+    // first item active in carousel
+    const firstItem = carouselInner.querySelector('.carousel-item');
+    if (firstItem) {
+      firstItem.classList.add('active');
+    }
+
+    // update info section
+    const breedInfo = images[0].breeds[0];
+    const infoElement = document.createElement('div');
+    infoElement.innerHTML = `<h3>${breedInfo.name}</h3><p>${breedInfo.description}</p>`;
+    infoDump.appendChild(infoElement);
+  } catch (error) {
+    console.error('Error fetching images:', error);
+  }
+}
